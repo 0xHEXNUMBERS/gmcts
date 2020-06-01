@@ -115,6 +115,8 @@ func (n *node) simulate() []Player {
 		var err error
 
 		actions := game.GetActions()
+		panicIfNoActions(game, actions)
+
 		randomIndex := rand.Intn(len(actions))
 		game, err = game.ApplyAction(actions[randomIndex])
 		if err != nil {
