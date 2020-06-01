@@ -46,9 +46,6 @@ func (n *node) UCB1(p Player) float64 {
 }
 
 func (n *node) selectNode() *node {
-	if n == nil {
-		return n
-	}
 	if n.children == nil || len(n.children) == 0 {
 		if n.nodeVisits == 0 || n.state.Game.IsTerminal() {
 			return n
