@@ -66,15 +66,6 @@ func (n *node) selectNode() *node {
 			maxChild = c
 		}
 	}
-	if maxChild == nil {
-		fmt.Println("CRASH START")
-		fmt.Println(n.children)
-		for i, c := range n.children {
-			fmt.Println(i, c.UCB1(n.state.Player()))
-		}
-		fmt.Println("CRASH END")
-		panic("rip")
-	}
 	return maxChild.selectNode()
 }
 
