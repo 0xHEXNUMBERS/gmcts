@@ -2,12 +2,9 @@ package gmcts
 
 import (
 	"fmt"
-	"os"
-	"runtime/pprof"
 	"sync"
 	"testing"
 
-	checkers "github.com/0xhexnumbers/go-checkers"
 	tictactoe "github.com/0xhexnumbers/go-tic-tac-toe"
 )
 
@@ -75,42 +72,6 @@ func TestTicTacToeMiddle(t *testing.T) {
 		if fmt.Sprintf("%v", action) != "{1 1}" {
 			t.Errorf("gmcts: first action is not to take the middle spot: %v", action)
 			t.FailNow()
-		}
-	}
-}
-
-func TestCheckers(t *testing.T) {
-	f, _ := os.Create("checkers.prof")
-	pprof.StartCPUProfile(f)
-	defer pprof.StopCPUProfile()
-
-	game := cGame{checkers.NewGame()}
-	concurrentSearches := 1 //runtime.NumCPU()
-
-	for !game.IsTerminal() {
-		mcts := NewMCTS(game)
-
-		var wait sync.WaitGroup
-		wait.Add(concurrentSearches)
-		for i := 0; i < concurrentSearches; i++ {
-			go func() {
-				tree := mcts.SpawnTree()
-				tree.SearchRounds(1000)
-				mcts.AddTree(tree)
-				wait.Done()
-			}()
-		}
-		wait.Wait()
-
-		bestAction := mcts.BestAction()
-		_, ok := bestAction.(checkers.Move)
-		if !ok {
-			t.Errorf("gmcts: type of best action is not a move: %T", bestAction)
-			t.FailNow()
-		} else {
-			nextState, _ := game.ApplyAction(bestAction)
-			game = nextState.(cGame)
-			fmt.Println(game.game)
 		}
 	}
 }

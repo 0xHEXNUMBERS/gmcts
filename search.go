@@ -72,8 +72,6 @@ func (n *node) selectNode() *node {
 		for i, c := range n.children {
 			fmt.Println(i, c.UCB1(n.state.Player()))
 		}
-		fmt.Println(n.state.Game.(cGame).game)
-		fmt.Println(n.state.Game.(cGame).game.GetActions())
 		fmt.Println("CRASH END")
 		panic("rip")
 	}

@@ -1,10 +1,8 @@
 package gmcts
 
 import (
-	"errors"
 	"fmt"
 
-	checkers "github.com/0xhexnumbers/go-checkers"
 	tictactoe "github.com/0xhexnumbers/go-tic-tac-toe"
 )
 
@@ -56,49 +54,6 @@ func (g tttGame) Winners() []Player {
 		return []Player{Player(0), Player(1)}
 	}
 
-	return []Player{getPlayerID(winner)}
-}
-
-type cGame struct {
-	game checkers.Game
-}
-
-func (g cGame) GetActions() []Action {
-	gameActions := g.game.GetActions()
-
-	actions := make([]Action, len(gameActions))
-
-	for i, a := range gameActions {
-		actions[i] = a
-	}
-
-	return actions
-}
-
-func (g cGame) ApplyAction(a Action) (Game, error) {
-	action, ok := a.(checkers.Move)
-	if !ok {
-		return nil, errors.New("gmcts: could not convert action to checkers move")
-	}
-
-	game, err := g.game.ApplyAction(action)
-	return cGame{game}, err
-}
-
-func (g cGame) Player() Player {
-	return getPlayerID(g.game.Player())
-}
-
-func (g cGame) IsTerminal() bool {
-	return g.game.IsTerminalState()
-}
-
-func (g cGame) Winners() []Player {
-	winner, _ := g.game.Winner()
-
-	if winner == '_' {
-		return []Player{Player(0), Player(1)}
-	}
 	return []Player{getPlayerID(winner)}
 }
 
