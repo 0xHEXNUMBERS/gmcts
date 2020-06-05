@@ -1,6 +1,8 @@
 package gmcts
 
-import "sync"
+import (
+	"sync"
+)
 
 //Action is the interface that represents an action that can be
 //performed on a Game.
@@ -52,12 +54,17 @@ type MCTS struct {
 	mutex *sync.RWMutex
 }
 
+type actionNodePair struct {
+	action Action
+	node   *node
+}
+
 type node struct {
 	state gameState
 	tree  *Tree
 
 	parents  []*node
-	children map[Action]*node
+	children []actionNodePair
 
 	nodeScore  map[Player]float64
 	nodeVisits int

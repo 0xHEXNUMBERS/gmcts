@@ -86,12 +86,19 @@ func (m *MCTS) BestAction() Action {
 		var visits int
 
 		for i := range m.trees {
-			node := m.trees[i].current.children[a]
-			if node == nil {
+			var n *node
+			children := m.trees[i].current.children
+			for j := 0; j < len(children); j++ {
+				if a == children[j].action {
+					n = children[j].node
+					break
+				}
+			}
+			if n == nil {
 				continue
 			}
-			score += node.nodeScore[playerTakingAction]
-			visits += node.nodeVisits
+			score += n.nodeScore[playerTakingAction]
+			visits += n.nodeVisits
 		}
 
 		if visits == 0 {

@@ -18,7 +18,6 @@ func initializeNode(g gameState, parent []*node, tree *Tree) *node {
 		state:     g,
 		tree:      tree,
 		parents:   parent,
-		children:  make(map[Action]*node),
 		nodeScore: make(map[Player]float64),
 	}
 }
@@ -57,11 +56,11 @@ func (n *node) selectNode() *node {
 	var maxChild *node
 	maxScore := -1.0
 	thisPlayer := n.state.Player()
-	for _, c := range n.children {
-		score := c.UCB1(thisPlayer)
+	for _, an := range n.children {
+		score := an.node.UCB1(thisPlayer)
 		if score > maxScore {
 			maxScore = score
-			maxChild = c
+			maxChild = an.node
 		}
 	}
 	return maxChild.selectNode()
@@ -77,7 +76,9 @@ func (n *node) isParentOf(potentialChild *node) bool {
 }
 
 func (n *node) expand() {
-	for _, action := range n.state.GetActions() {
+	actions := n.state.GetActions()
+	n.children = make([]actionNodePair, len(actions))
+	for i, action := range actions {
 		newGame, err := n.state.ApplyAction(action)
 		if err != nil {
 			panic(fmt.Sprintf("gmcts: Game returned an error when exploring the tree: %s", err))
@@ -92,19 +93,23 @@ func (n *node) expand() {
 				continue
 			}
 
-			n.children[action] = cachedNode
+			n.children[i] = actionNodePair{action, cachedNode}
 			cachedNode.parents = append(
 				cachedNode.parents, n,
 			)
 
 			//Update this node and each parent with the
 			//scores of this already existing child node
-			n.updateScoresWithExistingChild(n.children[action])
+			n.updateScoresWithExistingChild(cachedNode)
 		} else {
-			n.children[action] = initializeNode(newState, []*node{n}, n.tree)
+			newNode := initializeNode(newState, []*node{n}, n.tree)
+			n.children[i] = actionNodePair{
+				action: action,
+				node:   newNode,
+			}
 
 			//Save node for reuse
-			n.tree.gameStates[newState] = n.children[action]
+			n.tree.gameStates[newState] = newNode
 		}
 	}
 }
