@@ -46,9 +46,3 @@ func (t *Tree) search() {
 	winners := nodeToRun.simulate()
 	nodeToRun.backpropagation(winners, 1.0/float64(len(winners)))
 }
-
-func createTree(root gameState) *Tree {
-	t := &Tree{gameStates: make(map[gameState]*node)}
-	t.current = initializeNode(root, nil, t)
-	return t
-}
