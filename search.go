@@ -7,10 +7,10 @@ import (
 )
 
 const (
-	//ExplorationConst is the exploration constant of UCB1 Formula
+	//DefaultExplorationConst is the default exploration constant of UCB1 Formula
 	//Sqrt(2) is a frequent choice for this constant as specified by
 	//https://en.wikipedia.org/wiki/Monte_Carlo_tree_search
-	ExplorationConst = math.Sqrt2
+	DefaultExplorationConst = math.Sqrt2
 )
 
 func initializeNode(g gameState, parent []*node, tree *Tree) *node {
@@ -42,7 +42,7 @@ func (n *node) UCB1(p Player) float64 {
 		math.Log(parentVisits) / float64(n.nodeVisits),
 	)
 
-	return exploit + explore
+	return exploit + DefaultExplorationConst*explore
 }
 
 func (n *node) selectNode() *node {
