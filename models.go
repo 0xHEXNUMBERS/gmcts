@@ -65,6 +65,7 @@ type node struct {
 
 //Tree represents a game state tree
 type Tree struct {
-	current    *node
-	gameStates map[gameState]*node
+	current          *node
+	gameStates       map[gameState]*node
+	explorationConst float64
 }

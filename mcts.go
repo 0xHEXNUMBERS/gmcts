@@ -28,12 +28,18 @@ func NewMCTS(initial Game) *MCTS {
 	}
 }
 
-//SpawnTree creates a new search tree
+//SpawnTree creates a new search tree. The tree returned uses Sqrt(2) as the
+//exploration constant.
 func (m *MCTS) SpawnTree() *Tree {
+	return m.SpawnCustomTree(DefaultExplorationConst)
+}
+
+//SpawnCustomTree creates a new search tree with a given exploration constant.
+func (m *MCTS) SpawnCustomTree(explorationConst float64) *Tree {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
-	t := &Tree{gameStates: make(map[gameState]*node)}
+	t := &Tree{gameStates: make(map[gameState]*node), explorationConst: explorationConst}
 	t.current = initializeNode(gameState{m.init, 0}, nil, t)
 	return t
 }

@@ -42,7 +42,7 @@ func (n *node) UCB1(p Player) float64 {
 		math.Log(parentVisits) / float64(n.nodeVisits),
 	)
 
-	return exploit + DefaultExplorationConst*explore
+	return exploit + n.tree.explorationConst*explore
 }
 
 func (n *node) selectNode() *node {
