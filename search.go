@@ -34,7 +34,7 @@ func (n *node) UCB1(p Player) float64 {
 	//Calculate exploration component
 	//Because a node may have multiple parents,
 	//we need to sum the visits to the parent nodes
-	var parentVisits float64 = 0
+	var parentVisits float64
 	for _, p := range n.parents {
 		parentVisits += float64(p.nodeVisits)
 	}
@@ -53,11 +53,12 @@ func (n *node) selectNode() *node {
 		n.expand()
 	}
 
-	//Select the child with the max UCB score
-	var maxScore float64 = -1
-	var maxChild *node = nil
+	//Select the child with the max UCB score with the current player
+	var maxChild *node
+	maxScore := -1.0
+	thisPlayer := n.state.Player()
 	for _, c := range n.children {
-		score := c.UCB1(n.state.Player())
+		score := c.UCB1(thisPlayer)
 		if score > maxScore {
 			maxScore = score
 			maxChild = c
@@ -77,10 +78,10 @@ func (n *node) expand() {
 
 		//If we already have a copy in cache, use that and update
 		//this node and its parents
-		if _, made := n.tree.gameStates[newState]; made {
-			n.children[action] = n.tree.gameStates[newState]
-			n.children[action].parents = append(
-				n.children[action].parents, n,
+		if cachedNode, made := n.tree.gameStates[newState]; made {
+			n.children[action] = cachedNode
+			cachedNode.parents = append(
+				cachedNode.parents, n,
 			)
 
 			//Update this node and each parent with the

@@ -57,7 +57,7 @@ func (m *MCTS) AddTree(t *Tree) {
 //the best action based on the highest win percentage
 //of each action.
 //
-//BestAction returns nil if it has recieved no trees
+//BestAction returns nil if it has received no trees
 //to search through or if the current state
 //it's considering has no legal actions or is terminal.
 func (m *MCTS) BestAction() Action {
@@ -78,12 +78,12 @@ func (m *MCTS) BestAction() Action {
 
 	//Loop through each action and node and calculate the best
 	//winrate each action had when searching the trees
-	var bestAction Action = baseActions[0]
+	bestAction := baseActions[0]
 	bestWinRate := 0.0
 	playerTakingAction := rootState.Player()
 	for _, a := range baseActions {
-		var score float64 = 0
-		var visits int = 0
+		var score float64
+		var visits int
 
 		for i := range m.trees {
 			node := m.trees[i].current.children[a]

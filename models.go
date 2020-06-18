@@ -45,7 +45,7 @@ type gameState struct {
 	turn int
 }
 
-//MCTS contians functionality for the MCTS algorithm
+//MCTS contains functionality for the MCTS algorithm
 type MCTS struct {
 	init  Game
 	trees []*Tree
