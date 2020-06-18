@@ -67,6 +67,15 @@ func (n *node) selectNode() *node {
 	return maxChild.selectNode()
 }
 
+func (n *node) isParentOf(potentialChild *node) bool {
+	for _, p := range potentialChild.parents {
+		if n == p {
+			return true
+		}
+	}
+	return false
+}
+
 func (n *node) expand() {
 	for _, action := range n.state.GetActions() {
 		newGame, err := n.state.ApplyAction(action)
@@ -79,6 +88,10 @@ func (n *node) expand() {
 		//If we already have a copy in cache, use that and update
 		//this node and its parents
 		if cachedNode, made := n.tree.gameStates[newState]; made {
+			if n.isParentOf(cachedNode) {
+				continue
+			}
+
 			n.children[action] = cachedNode
 			cachedNode.parents = append(
 				cachedNode.parents, n,
