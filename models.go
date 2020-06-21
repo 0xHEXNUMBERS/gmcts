@@ -65,7 +65,6 @@ type node struct {
 	state gameState
 	tree  *Tree
 
-	parents           []*node
 	children          []*actionNodePair
 	unvisitedChildren []*actionNodePair
 

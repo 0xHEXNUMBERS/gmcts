@@ -40,7 +40,7 @@ func (m *MCTS) SpawnCustomTree(explorationConst float64) *Tree {
 	defer m.mutex.RUnlock()
 
 	t := &Tree{gameStates: make(map[gameState]*node), explorationConst: explorationConst}
-	t.current = initializeNode(gameState{m.init, 0}, nil, t)
+	t.current = initializeNode(gameState{m.init, 0}, t)
 	return t
 }
 

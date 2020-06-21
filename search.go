@@ -13,11 +13,10 @@ const (
 	DefaultExplorationConst = math.Sqrt2
 )
 
-func initializeNode(g gameState, parent []*node, tree *Tree) *node {
+func initializeNode(g gameState, tree *Tree) *node {
 	return &node{
 		state:     g,
 		tree:      tree,
-		parents:   parent,
 		nodeScore: make(map[Player]float64),
 	}
 }
@@ -85,8 +84,8 @@ func (n *node) selectNode() ([]Player, float64) {
 }
 
 func (n *node) isParentOf(potentialChild *node) bool {
-	for _, p := range potentialChild.parents {
-		if n == p {
+	for _, an := range n.children {
+		if an != nil && an.child == potentialChild {
 			return true
 		}
 	}
@@ -117,11 +116,8 @@ func (n *node) expand() {
 				parent: n,
 				child:  cachedNode,
 			}
-			cachedNode.parents = append(
-				cachedNode.parents, n,
-			)
 		} else {
-			newNode := initializeNode(newState, []*node{n}, n.tree)
+			newNode := initializeNode(newState, n.tree)
 			n.unvisitedChildren[i] = &actionNodePair{
 				action: a,
 				parent: n,
