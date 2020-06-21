@@ -42,7 +42,5 @@ func (t *Tree) SearchRounds(rounds int) {
 
 //search performs 1 round of the MCTS algorithm
 func (t *Tree) search() {
-	nodeToRun := t.current.selectNode()
-	winners := nodeToRun.simulate()
-	nodeToRun.backpropagation(winners, 1.0/float64(len(winners)))
+	t.current.selectNode()
 }

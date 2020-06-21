@@ -56,7 +56,9 @@ type MCTS struct {
 
 type actionNodePair struct {
 	action Action
-	node   *node
+	parent *node
+	child  *node
+	visits int
 }
 
 type node struct {
@@ -64,8 +66,8 @@ type node struct {
 	tree  *Tree
 
 	parents           []*node
-	children          []actionNodePair
-	unvisitedChildren []actionNodePair
+	children          []*actionNodePair
+	unvisitedChildren []*actionNodePair
 
 	nodeScore  map[Player]float64
 	nodeVisits int

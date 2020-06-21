@@ -90,7 +90,7 @@ func (m *MCTS) BestAction() Action {
 			children := m.trees[i].current.children
 			for j := 0; j < len(children); j++ {
 				if a == children[j].action {
-					n = children[j].node
+					n = children[j].child
 					break
 				}
 			}
