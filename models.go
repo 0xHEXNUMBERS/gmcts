@@ -63,8 +63,9 @@ type node struct {
 	state gameState
 	tree  *Tree
 
-	parents  []*node
-	children []actionNodePair
+	parents           []*node
+	children          []actionNodePair
+	unvisitedChildren []actionNodePair
 
 	nodeScore  map[Player]float64
 	nodeVisits int

@@ -45,11 +45,17 @@ func (n *node) UCB1(p Player) float64 {
 }
 
 func (n *node) selectNode() *node {
-	if n.children == nil || len(n.children) == 0 {
+	if len(n.children) == 0 {
 		if n.nodeVisits == 0 || n.state.Game.IsTerminal() {
 			return n
 		}
 		n.expand()
+	}
+
+	if len(n.unvisitedChildren) > 0 {
+		ret := n.unvisitedChildren[0]
+		n.unvisitedChildren = n.unvisitedChildren[1:]
+		return ret.node
 	}
 
 	//Select the child with the max UCB score with the current player
@@ -77,7 +83,8 @@ func (n *node) isParentOf(potentialChild *node) bool {
 
 func (n *node) expand() {
 	actions := n.state.GetActions()
-	n.children = make([]actionNodePair, len(actions))
+	n.unvisitedChildren = make([]actionNodePair, len(actions))
+	n.children = n.unvisitedChildren
 	for i, action := range actions {
 		newGame, err := n.state.ApplyAction(action)
 		if err != nil {
@@ -93,7 +100,7 @@ func (n *node) expand() {
 				continue
 			}
 
-			n.children[i] = actionNodePair{action, cachedNode}
+			n.unvisitedChildren[i] = actionNodePair{action, cachedNode}
 			cachedNode.parents = append(
 				cachedNode.parents, n,
 			)
@@ -103,7 +110,7 @@ func (n *node) expand() {
 			n.updateScoresWithExistingChild(cachedNode)
 		} else {
 			newNode := initializeNode(newState, []*node{n}, n.tree)
-			n.children[i] = actionNodePair{
+			n.unvisitedChildren[i] = actionNodePair{
 				action: action,
 				node:   newNode,
 			}
