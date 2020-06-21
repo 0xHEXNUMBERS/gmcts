@@ -22,9 +22,6 @@ func initializeNode(g gameState, tree *Tree) *node {
 }
 
 func (a *actionNodePair) UCT2(p Player) float64 {
-	if a.visits == 0 || a.parent.nodeVisits == 0 {
-		return math.MaxFloat64
-	}
 	//Calculate exploitation component
 	//Wins counts as a whole point, while draws count as half a point
 	exploit := a.child.nodeScore[p] / float64(a.child.nodeVisits)
