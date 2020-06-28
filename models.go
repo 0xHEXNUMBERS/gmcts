@@ -1,6 +1,7 @@
 package gmcts
 
 import (
+	"math/rand"
 	"sync"
 )
 
@@ -52,6 +53,7 @@ type MCTS struct {
 	init  Game
 	trees []*Tree
 	mutex *sync.RWMutex
+	seed  int64
 }
 
 type actionNodePair struct {
@@ -77,4 +79,5 @@ type Tree struct {
 	current          *node
 	gameStates       map[gameState]*node
 	explorationConst float64
+	randSource       *rand.Rand
 }

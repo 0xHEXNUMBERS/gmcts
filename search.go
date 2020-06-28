@@ -3,7 +3,6 @@ package gmcts
 import (
 	"fmt"
 	"math"
-	"math/rand"
 )
 
 const (
@@ -135,7 +134,7 @@ func (n *node) simulate() []Player {
 		actions := game.GetActions()
 		panicIfNoActions(game, actions)
 
-		randomIndex := rand.Intn(len(actions))
+		randomIndex := n.tree.randSource.Intn(len(actions))
 		game, err = game.ApplyAction(actions[randomIndex])
 		if err != nil {
 			panic(fmt.Sprintf("gmcts: game returned an error while searching the tree: %s", err))
