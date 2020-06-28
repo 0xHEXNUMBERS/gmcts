@@ -20,21 +20,21 @@ func initializeNode(g gameState, tree *Tree) *node {
 	}
 }
 
-func (a *actionNodePair) UCT2(p Player) float64 {
-	exploit := a.child.nodeScore[p] / float64(a.child.nodeVisits)
+func (n *node) UCT2(i int, p Player) float64 {
+	exploit := n.children[i].nodeScore[p] / n.children[i].nodeVisits
 
 	explore := math.Sqrt(
-		math.Log(float64(a.parent.nodeVisits)) / float64(a.visits),
+		math.Log(n.nodeVisits) / n.childVisits[i],
 	)
 
-	return exploit + a.parent.tree.explorationConst*explore
+	return exploit + n.tree.explorationConst*explore
 }
 
 func (n *node) selectNode() ([]Player, float64) {
-	var selectedChild *actionNodePair
+	var selectedChildIndex int
 	var winners []Player
 	var scoreToAdd float64
-	if len(n.children) == 0 {
+	if n.actionCount == 0 {
 		n.expand()
 	}
 
@@ -44,31 +44,31 @@ func (n *node) selectNode() ([]Player, float64) {
 		scoreToAdd = 1.0 / float64(len(winners))
 	} else if len(n.unvisitedChildren) > 0 {
 		//Grab the first unvisited child and run a simulation from that point
-		selectedChild = n.unvisitedChildren[0]
-		selectedChild.child.nodeVisits++
+		selectedChildIndex = n.actionCount - len(n.unvisitedChildren)
+		n.children[selectedChildIndex].nodeVisits++
 		n.unvisitedChildren = n.unvisitedChildren[1:]
 
-		winners = selectedChild.child.simulate()
+		winners = n.children[selectedChildIndex].simulate()
 		scoreToAdd = 1.0 / float64(len(winners))
 	} else {
 		//Select the child with the max UCT2 score with the current player
 		//and get the results to add from its selection
 		maxScore := -1.0
 		thisPlayer := n.state.Player()
-		for _, an := range n.children {
-			score := an.UCT2(thisPlayer)
+		for i := 0; i < n.actionCount; i++ {
+			score := n.UCT2(i, thisPlayer)
 			if score > maxScore {
 				maxScore = score
-				selectedChild = an
+				selectedChildIndex = i
 			}
 		}
-		winners, scoreToAdd = selectedChild.child.selectNode()
+		winners, scoreToAdd = n.children[selectedChildIndex].selectNode()
 	}
 
 	//Update this node along with each parent in this path recursively
 	n.nodeVisits++
-	if selectedChild != nil {
-		selectedChild.visits++
+	if n.actionCount != 0 {
+		n.childVisits[selectedChildIndex]++
 	}
 
 	for _, p := range winners {
@@ -78,8 +78,8 @@ func (n *node) selectNode() ([]Player, float64) {
 }
 
 func (n *node) isParentOf(potentialChild *node) bool {
-	for _, an := range n.children {
-		if an != nil && an.child == potentialChild {
+	for _, child := range n.children {
+		if child != nil && child == potentialChild {
 			return true
 		}
 	}
@@ -87,10 +87,12 @@ func (n *node) isParentOf(potentialChild *node) bool {
 }
 
 func (n *node) expand() {
-	actions := n.state.GetActions()
-	n.unvisitedChildren = make([]*actionNodePair, len(actions))
+	n.actions = n.state.GetActions()
+	n.actionCount = len(n.actions)
+	n.unvisitedChildren = make([]*node, n.actionCount)
 	n.children = n.unvisitedChildren
-	for i, a := range actions {
+	n.childVisits = make([]float64, n.actionCount)
+	for i, a := range n.actions {
 		newGame, err := n.state.ApplyAction(a)
 		if err != nil {
 			panic(fmt.Sprintf("gmcts: Game returned an error when exploring the tree: %s", err))
@@ -105,18 +107,10 @@ func (n *node) expand() {
 				continue
 			}
 
-			n.unvisitedChildren[i] = &actionNodePair{
-				action: a,
-				parent: n,
-				child:  cachedNode,
-			}
+			n.unvisitedChildren[i] = cachedNode
 		} else {
 			newNode := initializeNode(newState, n.tree)
-			n.unvisitedChildren[i] = &actionNodePair{
-				action: a,
-				parent: n,
-				child:  newNode,
-			}
+			n.unvisitedChildren[i] = newNode
 
 			//Save node for reuse
 			n.tree.gameStates[newState] = newNode

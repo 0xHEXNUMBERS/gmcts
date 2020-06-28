@@ -56,22 +56,18 @@ type MCTS struct {
 	seed  int64
 }
 
-type actionNodePair struct {
-	action Action
-	parent *node
-	child  *node
-	visits int
-}
-
 type node struct {
 	state gameState
 	tree  *Tree
 
-	children          []*actionNodePair
-	unvisitedChildren []*actionNodePair
+	actions           []Action
+	children          []*node
+	unvisitedChildren []*node
+	childVisits       []float64
+	actionCount       int
 
 	nodeScore  map[Player]float64
-	nodeVisits int
+	nodeVisits float64
 }
 
 //Tree represents a game state tree

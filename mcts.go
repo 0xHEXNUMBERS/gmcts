@@ -90,29 +90,29 @@ func (m *MCTS) BestAction() Action {
 	playerTakingAction := rootState.Player()
 	for _, a := range baseActions {
 		var score float64
-		var visits int
+		var visits float64
 
 		for i := range m.trees {
-			var n *node
-			children := m.trees[i].current.children
-			for j := 0; j < len(children); j++ {
-				if a == children[j].action {
-					n = children[j].child
+			var child *node
+			root := m.trees[i].current
+			for j := 0; j < root.actionCount; j++ {
+				if a == root.actions[j] {
+					child = root.children[j]
 					break
 				}
 			}
-			if n == nil {
+			if child == nil {
 				continue
 			}
-			score += n.nodeScore[playerTakingAction]
-			visits += n.nodeVisits
+			score += child.nodeScore[playerTakingAction]
+			visits += child.nodeVisits
 		}
 
 		if visits == 0 {
 			continue
 		}
 
-		winRate := score / float64(visits)
+		winRate := score / visits
 		if winRate > bestWinRate {
 			bestAction = a
 			bestWinRate = winRate
