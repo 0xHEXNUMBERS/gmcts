@@ -30,7 +30,7 @@ func (n *node) UCT2(i int, p Player) float64 {
 	return exploit + n.tree.explorationConst*explore
 }
 
-func (n *node) selectNode() ([]Player, float64) {
+func (n *node) runSimulation() ([]Player, float64) {
 	var selectedChildIndex int
 	var winners []Player
 	var scoreToAdd float64
@@ -62,7 +62,7 @@ func (n *node) selectNode() ([]Player, float64) {
 				selectedChildIndex = i
 			}
 		}
-		winners, scoreToAdd = n.children[selectedChildIndex].selectNode()
+		winners, scoreToAdd = n.children[selectedChildIndex].runSimulation()
 	}
 
 	//Update this node along with each parent in this path recursively
