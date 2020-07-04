@@ -34,11 +34,13 @@ func (n *node) runSimulation() ([]Player, float64) {
 	var selectedChildIndex int
 	var winners []Player
 	var scoreToAdd float64
-	if n.actionCount == 0 {
+
+	terminalState := n.state.IsTerminal()
+	if !terminalState && n.actionCount == 0 {
 		n.expand()
 	}
 
-	if n.state.Game.IsTerminal() {
+	if terminalState {
 		//Get the result of the game
 		winners = n.simulate()
 		scoreToAdd = 1.0 / float64(len(winners))
