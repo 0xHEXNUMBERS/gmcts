@@ -21,10 +21,10 @@ func initializeNode(g gameState, tree *Tree) *node {
 }
 
 func (n *node) UCT2(i int, p Player) float64 {
-	exploit := n.children[i].nodeScore[p] / n.children[i].nodeVisits
+	exploit := n.children[i].nodeScore[p] / float64(n.children[i].nodeVisits)
 
 	explore := math.Sqrt(
-		math.Log(n.nodeVisits) / n.childVisits[i],
+		math.Log(float64(n.nodeVisits)) / n.childVisits[i],
 	)
 
 	return exploit + n.tree.explorationConst*explore

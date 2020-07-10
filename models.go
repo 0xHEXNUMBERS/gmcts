@@ -67,7 +67,7 @@ type node struct {
 	actionCount       int
 
 	nodeScore  map[Player]float64
-	nodeVisits float64
+	nodeVisits int
 }
 
 //Tree represents a game state tree
