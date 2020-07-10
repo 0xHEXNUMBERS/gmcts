@@ -44,3 +44,21 @@ func (t *Tree) SearchRounds(rounds int) {
 func (t *Tree) search() {
 	t.current.runSimulation()
 }
+
+func (t *Tree) bestAction() Action {
+	root := t.current
+
+	//Select the child with the highest winrate
+	var bestAction Action
+	bestWinRate := -1.0
+	player := root.state.Player()
+	for i := 0; i < root.actionCount; i++ {
+		winRate := root.children[i].nodeScore[player] / root.childVisits[i]
+		if winRate > bestWinRate {
+			bestAction = root.actions[i]
+			bestWinRate = winRate
+		}
+	}
+
+	return bestAction
+}

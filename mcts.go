@@ -77,45 +77,23 @@ func (m *MCTS) BestAction() Action {
 
 	//Safe guard set in place in case we're dealing
 	//with a terminal state
-	rootState := m.init
-	baseActions := rootState.GetActions()
-	if len(baseActions) == 0 || rootState.IsTerminal() {
+	if m.init.IsTerminal() {
 		return nil
 	}
 
-	//Loop through each action and node and calculate the best
-	//winrate each action had when searching the trees
-	bestAction := baseActions[0]
-	bestWinRate := 0.0
-	playerTakingAction := rootState.Player()
-	for _, a := range baseActions {
-		var score float64
-		var visits float64
+	//Democracy Section: each tree votes for an action
+	actionScore := make(map[Action]int)
+	for _, t := range m.trees {
+		actionScore[t.bestAction()]++
+	}
 
-		for i := range m.trees {
-			var child *node
-			root := m.trees[i].current
-			for j := 0; j < root.actionCount; j++ {
-				if a == root.actions[j] {
-					child = root.children[j]
-					break
-				}
-			}
-			if child == nil {
-				continue
-			}
-			score += child.nodeScore[playerTakingAction]
-			visits += child.nodeVisits
-		}
-
-		if visits == 0 {
-			continue
-		}
-
-		winRate := score / visits
-		if winRate > bestWinRate {
+	//Democracy Section: the action with the most votes wins
+	var bestAction Action
+	var mostVotes int
+	for a, s := range actionScore {
+		if s > mostVotes {
 			bestAction = a
-			bestWinRate = winRate
+			mostVotes = s
 		}
 	}
 	return bestAction
