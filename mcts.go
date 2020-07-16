@@ -39,6 +39,15 @@ func (m *MCTS) SpawnTree() *Tree {
 	return m.SpawnCustomTree(DefaultExplorationConst)
 }
 
+//SetSeed sets the seed of the next tree to be spawned.
+//This value is initially set to 1, and increments on each
+//spawned tree.
+func (m *MCTS) SetSeed(seed int64) {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+	m.seed = seed
+}
+
 //SpawnCustomTree creates a new search tree with a given exploration constant.
 func (m *MCTS) SpawnCustomTree(explorationConst float64) *Tree {
 	m.mutex.Lock()
