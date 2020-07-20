@@ -17,9 +17,13 @@ func NewMCTS(initial Game) *MCTS {
 	}
 
 	//Check if Action type is comparable
-	action := initial.GetActions()
-	if !reflect.TypeOf(action).Elem().Comparable() {
-		panic("gmcts: action type is not comparable")
+	//We only need to check the actions that can affect the initial gamestate
+	//as those are the only actions that need to be compared.
+	actions := initial.GetActions()
+	for i := range actions {
+		if !reflect.TypeOf(actions[i]).Comparable() {
+			panic("gmcts: action type is not comparable")
+		}
 	}
 
 	return &MCTS{
