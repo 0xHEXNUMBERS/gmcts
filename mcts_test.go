@@ -59,9 +59,18 @@ func (g tttGame) Winners() []Player {
 	return []Player{getPlayerID(winner)}
 }
 
-func TestTicTacToeDraw(t *testing.T) {
+//Global vars to be checked by other tests
+var finishedGame tttGame
+var firstMove tictactoe.Move
+
+//TestMain runs through a tictactoe game, saving the first move made and
+//the resulting terminal game state into global variables to be used by
+//other tests.
+func TestMain(m *testing.M) {
 	game := tttGame{tictactoe.NewGame()}
 	concurrentSearches := 1 //runtime.NumCPU()
+
+	var setFirstMove sync.Once
 
 	for !game.IsTerminal() {
 		mcts := NewMCTS(game)
@@ -79,50 +88,35 @@ func TestTicTacToeDraw(t *testing.T) {
 		wait.Wait()
 
 		bestAction := mcts.BestAction()
-		_, ok := bestAction.(tictactoe.Move)
-		if !ok {
-			t.Errorf("gmcts: type of best action is not a move: %T", bestAction)
-			t.FailNow()
-		} else {
-			nextState, _ := game.ApplyAction(bestAction)
-			game = nextState.(tttGame)
-			fmt.Println(game.game)
-		}
-	}
+		nextState, _ := game.ApplyAction(bestAction)
+		game = nextState.(tttGame)
+		fmt.Println(game.game)
 
+		//Save the first action taken
+		setFirstMove.Do(func() {
+			firstMove = bestAction.(tictactoe.Move)
+		})
+	}
+	//Save the terminal game state
+	finishedGame = game
+
+	m.Run()
+}
+
+func TestTicTacToeDraw(t *testing.T) {
 	//Fail if there's a winner. Because tic-tac-toe is a simple game,
 	//this algorithm should've finished in a draw.
-	if len(game.Winners()) != 2 {
+	if len(finishedGame.Winners()) != 2 {
 		t.Errorf("gmcts: tic-tac-toe game did not end in a draw")
 		t.FailNow()
 	}
 }
 
 func TestTicTacToeMiddle(t *testing.T) {
-	mcts := NewMCTS(tttGame{tictactoe.NewGame()})
-	concurrentSearches := 1 //runtime.NumCPU()
-
-	var wait sync.WaitGroup
-	wait.Add(concurrentSearches)
-	for i := 0; i < concurrentSearches; i++ {
-		go func() {
-			tree := mcts.SpawnTree()
-			tree.SearchRounds(10000)
-			mcts.AddTree(tree)
-			wait.Done()
-		}()
-	}
-	wait.Wait()
-
-	bestAction := mcts.BestAction()
-	action, ok := bestAction.(tictactoe.Move)
-	if !ok {
-		t.Errorf("gmcts: type of best action is not a move: %T", bestAction)
+	//Fail if the first move doesn't pick the middle square. Because tic-tac-toe
+	//is a simple game, this algorithm should've picked the middle square.
+	if fmt.Sprintf("%v", firstMove) != "{1 1}" {
+		t.Errorf("gmcts: first action is not to take the middle spot: %v", firstMove)
 		t.FailNow()
-	} else {
-		if fmt.Sprintf("%v", action) != "{1 1}" {
-			t.Errorf("gmcts: first action is not to take the middle spot: %v", action)
-			t.FailNow()
-		}
 	}
 }
