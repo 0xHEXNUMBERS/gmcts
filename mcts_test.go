@@ -127,3 +127,22 @@ func TestTicTacToeMiddle(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestZeroTrees(t *testing.T) {
+	mcts := NewMCTS(finishedGame)
+	bestAction := mcts.BestAction()
+	if bestAction != nil {
+		t.Errorf("gmcts: recieved a best action from no trees: %#v", bestAction)
+		t.FailNow()
+	}
+}
+
+func TestTerminalState(t *testing.T) {
+	mcts := NewMCTS(finishedGame)
+	mcts.AddTree(mcts.SpawnTree())
+	bestAction := mcts.BestAction()
+	if bestAction != nil {
+		t.Errorf("gmcts: recieved a best action from a terminal state: %#v", bestAction)
+		t.FailNow()
+	}
+}
