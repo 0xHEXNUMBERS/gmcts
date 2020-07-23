@@ -62,6 +62,7 @@ func (g tttGame) Winners() []Player {
 //Global vars to be checked by other tests
 var finishedGame tttGame
 var firstMove tictactoe.Move
+var treeToTest *Tree
 
 //TestMain runs through a tictactoe game, saving the first move made and
 //the resulting terminal game state into global variables to be used by
@@ -71,6 +72,7 @@ func TestMain(m *testing.M) {
 	concurrentSearches := 1 //runtime.NumCPU()
 
 	var setFirstMove sync.Once
+	var setTestingTree sync.Once
 
 	for !game.IsTerminal() {
 		mcts := NewMCTS(game)
@@ -83,6 +85,11 @@ func TestMain(m *testing.M) {
 				tree.SearchRounds(10000)
 				mcts.AddTree(tree)
 				wait.Done()
+
+				//Set the tree to perform benchmarks on
+				setTestingTree.Do(func() {
+					treeToTest = tree
+				})
 			}()
 		}
 		wait.Wait()

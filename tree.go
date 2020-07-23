@@ -45,6 +45,30 @@ func (t *Tree) search() {
 	t.current.runSimulation()
 }
 
+//Rounds returns the number of MCTS rounds were performed
+//on this tree.
+func (t Tree) Rounds() int {
+	return t.current.nodeVisits
+}
+
+//Nodes returns the number of nodes created on this tree.
+func (t Tree) Nodes() int {
+	return len(t.gameStates)
+}
+
+//MaxDepth returns the maximum depth of this tree.
+//The value can be thought of as the amount of moves ahead
+//this tree searched through.
+func (t Tree) MaxDepth() int {
+	maxDepth := 0
+	for state := range t.gameStates {
+		if state.turn > maxDepth {
+			maxDepth = state.turn
+		}
+	}
+	return maxDepth
+}
+
 func (t *Tree) bestAction() Action {
 	root := t.current
 
