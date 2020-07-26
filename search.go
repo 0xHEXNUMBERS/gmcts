@@ -79,15 +79,6 @@ func (n *node) runSimulation() ([]Player, float64) {
 	return winners, scoreToAdd
 }
 
-func (n *node) isParentOf(potentialChild *node) bool {
-	for _, child := range n.children {
-		if child != nil && child == potentialChild {
-			return true
-		}
-	}
-	return false
-}
-
 func (n *node) expand() {
 	n.actions = n.state.GetActions()
 	n.actionCount = len(n.actions)
@@ -105,10 +96,6 @@ func (n *node) expand() {
 		//If we already have a copy in cache, use that and update
 		//this node and its parents
 		if cachedNode, made := n.tree.gameStates[newState]; made {
-			if n.isParentOf(cachedNode) {
-				continue
-			}
-
 			n.unvisitedChildren[i] = cachedNode
 		} else {
 			newNode := initializeNode(newState, n.tree)
