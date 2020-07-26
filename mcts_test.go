@@ -146,3 +146,27 @@ func TestTerminalState(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func BenchmarkTicTacToe1KRounds(b *testing.B) {
+	mcts := NewMCTS(tttGame{tictactoe.NewGame()})
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		mcts.SpawnTree().SearchRounds(1000)
+	}
+}
+
+func BenchmarkTicTacToe10KRounds(b *testing.B) {
+	mcts := NewMCTS(tttGame{tictactoe.NewGame()})
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		mcts.SpawnTree().SearchRounds(10000)
+	}
+}
+
+func BenchmarkTicTacToe100KRounds(b *testing.B) {
+	mcts := NewMCTS(tttGame{tictactoe.NewGame()})
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		mcts.SpawnTree().SearchRounds(100000)
+	}
+}
