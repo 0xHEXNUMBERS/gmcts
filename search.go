@@ -34,10 +34,16 @@ func (n *node) runSimulation() ([]Player, float64) {
 	var selectedChildIndex int
 	var winners []Player
 	var scoreToAdd float64
+	var terminalState bool
 
-	terminalState := n.state.IsTerminal()
-	if !terminalState && n.actionCount == 0 {
-		n.expand()
+	//If we have actions, then there's no need to expand.
+	if n.actionCount == 0 {
+		//If we don't have any actions, then either the state
+		//is terminal, or we haven't expanded the node yet.
+		terminalState = n.state.IsTerminal()
+		if !terminalState {
+			n.expand()
+		}
 	}
 
 	if terminalState {
