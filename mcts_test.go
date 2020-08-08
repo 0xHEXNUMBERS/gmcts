@@ -16,30 +16,18 @@ func getPlayerID(ascii byte) Player {
 }
 
 type tttGame struct {
-	game tictactoe.Game
+	game    tictactoe.Game
+	actions []tictactoe.Move
 }
 
-func (g tttGame) GetActions() []Action {
-	gameActions := g.game.GetActions()
-
-	actions := make([]Action, len(gameActions))
-
-	for i, a := range gameActions {
-		actions[i] = a
-	}
-
-	return actions
+func (g tttGame) Len() int {
+	return len(g.actions)
 }
 
-func (g tttGame) ApplyAction(a Action) (Game, error) {
-	move, ok := a.(tictactoe.Move)
-	if !ok {
-		return nil, fmt.Errorf("action not correct type")
-	}
+func (g tttGame) ApplyAction(i int) (Game, error) {
+	game, err := g.game.ApplyAction(g.actions[i])
 
-	game, err := g.game.ApplyAction(move)
-
-	return tttGame{game}, err
+	return tttGame{game, game.GetActions()}, err
 }
 
 func (g tttGame) Hash() interface{} {
@@ -64,7 +52,7 @@ func (g tttGame) Winners() []Player {
 }
 
 //Global vars to be checked by other tests
-var finishedGame tttGame
+var newGame, finishedGame tttGame
 var firstMove tictactoe.Move
 var treeToTest *Tree
 
@@ -72,7 +60,10 @@ var treeToTest *Tree
 //the resulting terminal game state into global variables to be used by
 //other tests.
 func TestMain(m *testing.M) {
-	game := tttGame{tictactoe.NewGame()}
+	newGame = tttGame{game: tictactoe.NewGame()}
+	newGame.actions = newGame.game.GetActions()
+
+	game := newGame
 	concurrentSearches := 1 //runtime.NumCPU()
 
 	var setFirstMove sync.Once
@@ -105,7 +96,7 @@ func TestMain(m *testing.M) {
 
 		//Save the first action taken
 		setFirstMove.Do(func() {
-			firstMove = bestAction.(tictactoe.Move)
+			firstMove = newGame.actions[bestAction]
 		})
 	}
 	//Save the terminal game state
@@ -135,7 +126,7 @@ func TestTicTacToeMiddle(t *testing.T) {
 func TestZeroTrees(t *testing.T) {
 	mcts := NewMCTS(finishedGame)
 	bestAction := mcts.BestAction()
-	if bestAction != nil {
+	if bestAction != -1 {
 		t.Errorf("gmcts: recieved a best action from no trees: %#v", bestAction)
 		t.FailNow()
 	}
@@ -145,14 +136,14 @@ func TestTerminalState(t *testing.T) {
 	mcts := NewMCTS(finishedGame)
 	mcts.AddTree(mcts.SpawnTree())
 	bestAction := mcts.BestAction()
-	if bestAction != nil {
+	if bestAction != -1 {
 		t.Errorf("gmcts: recieved a best action from a terminal state: %#v", bestAction)
 		t.FailNow()
 	}
 }
 
 func BenchmarkTicTacToe1KRounds(b *testing.B) {
-	mcts := NewMCTS(tttGame{tictactoe.NewGame()})
+	mcts := NewMCTS(newGame)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		mcts.SpawnTree().SearchRounds(1000)
@@ -160,7 +151,7 @@ func BenchmarkTicTacToe1KRounds(b *testing.B) {
 }
 
 func BenchmarkTicTacToe10KRounds(b *testing.B) {
-	mcts := NewMCTS(tttGame{tictactoe.NewGame()})
+	mcts := NewMCTS(newGame)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		mcts.SpawnTree().SearchRounds(10000)
@@ -168,7 +159,7 @@ func BenchmarkTicTacToe10KRounds(b *testing.B) {
 }
 
 func BenchmarkTicTacToe100KRounds(b *testing.B) {
-	mcts := NewMCTS(tttGame{tictactoe.NewGame()})
+	mcts := NewMCTS(newGame)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		mcts.SpawnTree().SearchRounds(100000)

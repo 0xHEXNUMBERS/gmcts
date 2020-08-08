@@ -37,7 +37,8 @@ func TestDepth(t *testing.T) {
 }
 
 func TestSearch(t *testing.T) {
-	mcts := NewMCTS(tttGame{tictactoe.NewGame()})
+	newGame := tictactoe.NewGame()
+	mcts := NewMCTS(tttGame{newGame, newGame.GetActions()})
 	tree := mcts.SpawnTree()
 
 	timeToSearch := 1 * time.Millisecond

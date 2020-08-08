@@ -8,7 +8,8 @@ import (
 //Search searches the tree for a specified time
 //
 //Search will panic if the Game's ApplyAction
-//method returns an error
+//method returns an error or if any game state's Hash()
+//method returns a noncomparable value.
 func (t *Tree) Search(duration time.Duration) {
 	ctx, cancel := context.WithTimeout(context.Background(), duration)
 	defer cancel()
@@ -18,7 +19,8 @@ func (t *Tree) Search(duration time.Duration) {
 //SearchContext searches the tree using a given context
 //
 //SearchContext will panic if the Game's ApplyAction
-//method returns an error
+//method returns an error or if any game state's Hash()
+//method returns a noncomparable value.
 func (t *Tree) SearchContext(ctx context.Context) {
 	for {
 		select {
@@ -33,7 +35,8 @@ func (t *Tree) SearchContext(ctx context.Context) {
 //SearchRounds searches the tree for a specified number of rounds
 //
 //SearchRounds will panic if the Game's ApplyAction
-//method returns an error
+//method returns an error or if any game state's Hash()
+//method returns a noncomparable value.
 func (t *Tree) SearchRounds(rounds int) {
 	for i := 0; i < rounds; i++ {
 		t.search()
@@ -69,17 +72,17 @@ func (t Tree) MaxDepth() int {
 	return maxDepth
 }
 
-func (t *Tree) bestAction() Action {
+func (t *Tree) bestAction() int {
 	root := t.current
 
 	//Select the child with the highest winrate
-	var bestAction Action
+	var bestAction int
 	bestWinRate := -1.0
 	player := root.state.Player()
 	for i := 0; i < root.actionCount; i++ {
 		winRate := root.children[i].nodeScore[player] / root.childVisits[i]
 		if winRate > bestWinRate {
-			bestAction = root.actions[i]
+			bestAction = i
 			bestWinRate = winRate
 		}
 	}

@@ -86,13 +86,12 @@ func (n *node) runSimulation() ([]Player, float64) {
 }
 
 func (n *node) expand() {
-	n.actions = n.state.GetActions()
-	n.actionCount = len(n.actions)
+	n.actionCount = n.state.Len()
 	n.unvisitedChildren = make([]*node, n.actionCount)
 	n.children = n.unvisitedChildren
 	n.childVisits = make([]float64, n.actionCount)
-	for i, a := range n.actions {
-		newGame, err := n.state.ApplyAction(a)
+	for i := 0; i < n.actionCount; i++ {
+		newGame, err := n.state.ApplyAction(i)
 		if err != nil {
 			panic(fmt.Sprintf("gmcts: Game returned an error when exploring the tree: %s", err))
 		}
@@ -118,11 +117,13 @@ func (n *node) simulate() []Player {
 	for !game.IsTerminal() {
 		var err error
 
-		actions := game.GetActions()
-		panicIfNoActions(game, actions)
+		actions := game.Len()
+		if actions <= 0 {
+			panic(fmt.Sprintf("gmcts: game returned no actions on a non-terminal state: %#v", game))
+		}
 
-		randomIndex := n.tree.randSource.Intn(len(actions))
-		game, err = game.ApplyAction(actions[randomIndex])
+		randomIndex := n.tree.randSource.Intn(actions)
+		game, err = game.ApplyAction(randomIndex)
 		if err != nil {
 			panic(fmt.Sprintf("gmcts: game returned an error while searching the tree: %s", err))
 		}

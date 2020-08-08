@@ -5,12 +5,6 @@ import (
 	"sync"
 )
 
-//Action is the interface that represents an action that can be
-//performed on a Game.
-//
-//Any implementation of Action should be comparable (i.e. be a key in a map)
-type Action interface{}
-
 //Player is an id for the player
 type Player int
 
@@ -19,12 +13,12 @@ type Player int
 //Any implementation of Game should be comparable (i.e. be a key in a map)
 //and immutable (state cannot change as this package calls any function).
 type Game interface {
-	//GetActions returns a list of actions to consider
-	GetActions() []Action
+	//Len returns the number of actions to consider.
+	Len() int
 
-	//ApplyAction applies the given action to the game state,
+	//ApplyAction applies the ith action (0-indexed) to the game state,
 	//and returns a new game state and an error for invalid actions
-	ApplyAction(Action) (Game, error)
+	ApplyAction(i int) (Game, error)
 
 	//Hash returns a unique representation of the state.
 	//Any return value must be comparable.
@@ -69,7 +63,6 @@ type node struct {
 	state gameState
 	tree  *Tree
 
-	actions           []Action
 	children          []*node
 	unvisitedChildren []*node
 	childVisits       []float64
