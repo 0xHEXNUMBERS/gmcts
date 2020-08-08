@@ -42,6 +42,10 @@ func (g tttGame) ApplyAction(a Action) (Game, error) {
 	return tttGame{game}, err
 }
 
+func (g tttGame) Hash() interface{} {
+	return g.game
+}
+
 func (g tttGame) Player() Player {
 	return getPlayerID(g.game.Player())
 }

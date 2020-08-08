@@ -61,9 +61,9 @@ func (t Tree) Nodes() int {
 //this tree searched through.
 func (t Tree) MaxDepth() int {
 	maxDepth := 0
-	for state := range t.gameStates {
-		if state.turn > maxDepth {
-			maxDepth = state.turn
+	for _, node := range t.gameStates {
+		if node.state.turn > maxDepth {
+			maxDepth = node.state.turn
 		}
 	}
 	return maxDepth

@@ -26,6 +26,10 @@ type Game interface {
 	//and returns a new game state and an error for invalid actions
 	ApplyAction(Action) (Game, error)
 
+	//Hash returns a unique representation of the state.
+	//Any return value must be comparable.
+	Hash() interface{}
+
 	//Player returns the player that can take the next action
 	Player() Player
 
@@ -39,6 +43,11 @@ type Game interface {
 
 type gameState struct {
 	Game
+	gameHash
+}
+
+type gameHash struct {
+	hash interface{}
 
 	//This is to separate states that seemingly look the same,
 	//but actually occur on different turn orders. Without this,
@@ -73,7 +82,7 @@ type node struct {
 //Tree represents a game state tree
 type Tree struct {
 	current          *node
-	gameStates       map[gameState]*node
+	gameStates       map[gameHash]*node
 	explorationConst float64
 	randSource       *rand.Rand
 }

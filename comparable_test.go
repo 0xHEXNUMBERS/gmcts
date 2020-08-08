@@ -24,6 +24,10 @@ func (n comparableState) IsTerminal() bool {
 	return true
 }
 
+func (n comparableState) Hash() interface{} {
+	return 0
+}
+
 func (n comparableState) Player() Player {
 	return 0
 }

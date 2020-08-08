@@ -97,18 +97,18 @@ func (n *node) expand() {
 			panic(fmt.Sprintf("gmcts: Game returned an error when exploring the tree: %s", err))
 		}
 
-		newState := gameState{newGame, n.state.turn + 1}
+		newState := gameState{newGame, gameHash{newGame.Hash(), n.state.turn + 1}}
 
 		//If we already have a copy in cache, use that and update
 		//this node and its parents
-		if cachedNode, made := n.tree.gameStates[newState]; made {
+		if cachedNode, made := n.tree.gameStates[newState.gameHash]; made {
 			n.unvisitedChildren[i] = cachedNode
 		} else {
 			newNode := initializeNode(newState, n.tree)
 			n.unvisitedChildren[i] = newNode
 
 			//Save node for reuse
-			n.tree.gameStates[newState] = newNode
+			n.tree.gameStates[newState.gameHash] = newNode
 		}
 	}
 }

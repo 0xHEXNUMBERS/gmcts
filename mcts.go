@@ -54,11 +54,11 @@ func (m *MCTS) SpawnCustomTree(explorationConst float64) *Tree {
 	defer m.mutex.Unlock()
 
 	t := &Tree{
-		gameStates:       make(map[gameState]*node),
+		gameStates:       make(map[gameHash]*node),
 		explorationConst: explorationConst,
 		randSource:       rand.New(rand.NewSource(m.seed)),
 	}
-	t.current = initializeNode(gameState{m.init, 0}, t)
+	t.current = initializeNode(gameState{m.init, gameHash{m.init.Hash(), 0}}, t)
 
 	m.seed++
 	return t
