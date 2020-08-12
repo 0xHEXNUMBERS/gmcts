@@ -1,8 +1,20 @@
 package gmcts
 
 import (
+	"errors"
 	"math/rand"
 	"sync"
+)
+
+var (
+	//ErrNoTrees notifies the callee that the MCTS wrapper has recieved to trees to analyze
+	ErrNoTrees = errors.New("gmcts: mcts wrapper has collected to trees to analyze")
+
+	//ErrTerminal notifies the callee that the given state is terminal
+	ErrTerminal = errors.New("gmcts: given game state is a terminal state, therefore, it cannot return an action")
+
+	//ErrNoActions notifies the callee that the given state has <= 0 actions
+	ErrNoActions = errors.New("gmcts: given game state is not terminal, yet the state has <= 0 actions to search through")
 )
 
 //NewMCTS returns a new MCTS wrapper
@@ -55,24 +67,24 @@ func (m *MCTS) AddTree(t *Tree) {
 }
 
 //BestAction takes all of the searched trees and returns
-//the best action based on the highest win percentage
-//of each action.
+//the index of the best action based on the highest win
+//percentage of each action.
 //
-//BestAction returns nil if it has received no trees
-//to search through or if the current state
-//it's considering has no legal actions or is terminal.
-func (m *MCTS) BestAction() int {
+//BestAction returns ErrNoTrees if it has received no trees
+//to search through, ErrNoActions if the current state
+//it's considering has no legal actions, or ErrTerminal
+//if the current state it's considering is terminal.
+func (m *MCTS) BestAction() (int, error) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
+	//Error checking
 	if len(m.trees) == 0 {
-		return -1
-	}
-
-	//Safe guard set in place in case we're dealing
-	//with a terminal state
-	if m.init.IsTerminal() {
-		return -1
+		return -1, ErrNoTrees
+	} else if m.init.IsTerminal() {
+		return -1, ErrTerminal
+	} else if m.init.Len() <= 0 {
+		return -1, ErrNoActions
 	}
 
 	//Democracy Section: each tree votes for an action
@@ -90,5 +102,5 @@ func (m *MCTS) BestAction() int {
 			mostVotes = s
 		}
 	}
-	return bestAction
+	return bestAction, nil
 }

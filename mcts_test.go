@@ -89,7 +89,7 @@ func TestMain(m *testing.M) {
 		}
 		wait.Wait()
 
-		bestAction := mcts.BestAction()
+		bestAction, _ := mcts.BestAction()
 		nextState, _ := game.ApplyAction(bestAction)
 		game = nextState.(tttGame)
 		fmt.Println(game.game)
@@ -125,7 +125,7 @@ func TestTicTacToeMiddle(t *testing.T) {
 
 func TestZeroTrees(t *testing.T) {
 	mcts := NewMCTS(finishedGame)
-	bestAction := mcts.BestAction()
+	bestAction, _ := mcts.BestAction()
 	if bestAction != -1 {
 		t.Errorf("gmcts: recieved a best action from no trees: %#v", bestAction)
 		t.FailNow()
@@ -135,7 +135,7 @@ func TestZeroTrees(t *testing.T) {
 func TestTerminalState(t *testing.T) {
 	mcts := NewMCTS(finishedGame)
 	mcts.AddTree(mcts.SpawnTree())
-	bestAction := mcts.BestAction()
+	bestAction, _ := mcts.BestAction()
 	if bestAction != -1 {
 		t.Errorf("gmcts: recieved a best action from a terminal state: %#v", bestAction)
 		t.FailNow()
