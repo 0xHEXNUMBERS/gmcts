@@ -1,31 +1,24 @@
 package gmcts
 
 import (
+	"errors"
 	"math/rand"
-	"reflect"
 	"sync"
 )
 
+var (
+	//ErrNoTrees notifies the callee that the MCTS wrapper has recieved to trees to analyze
+	ErrNoTrees = errors.New("gmcts: mcts wrapper has collected to trees to analyze")
+
+	//ErrTerminal notifies the callee that the given state is terminal
+	ErrTerminal = errors.New("gmcts: given game state is a terminal state, therefore, it cannot return an action")
+
+	//ErrNoActions notifies the callee that the given state has <= 0 actions
+	ErrNoActions = errors.New("gmcts: given game state is not terminal, yet the state has <= 0 actions to search through")
+)
+
 //NewMCTS returns a new MCTS wrapper
-//
-//If either the Game or its Action types are not comparable,
-//this function panics
 func NewMCTS(initial Game) *MCTS {
-	//Check if Game type if comparable
-	if !reflect.TypeOf(initial).Comparable() {
-		panic("gmcts: game type is not comparable")
-	}
-
-	//Check if Action type is comparable
-	//We only need to check the actions that can affect the initial gamestate
-	//as those are the only actions that need to be compared.
-	actions := initial.GetActions()
-	for i := range actions {
-		if !reflect.TypeOf(actions[i]).Comparable() {
-			panic("gmcts: action type is not comparable")
-		}
-	}
-
 	return &MCTS{
 		init:  initial,
 		trees: make([]*Tree, 0),
@@ -40,7 +33,7 @@ func (m *MCTS) SpawnTree() *Tree {
 }
 
 //SetSeed sets the seed of the next tree to be spawned.
-//This value is initially set to 1, and increments on each
+//This value is initially set to 0, and increments on each
 //spawned tree.
 func (m *MCTS) SetSeed(seed int64) {
 	m.mutex.Lock()
@@ -54,11 +47,11 @@ func (m *MCTS) SpawnCustomTree(explorationConst float64) *Tree {
 	defer m.mutex.Unlock()
 
 	t := &Tree{
-		gameStates:       make(map[gameState]*node),
+		gameStates:       make(map[gameHash]*node),
 		explorationConst: explorationConst,
 		randSource:       rand.New(rand.NewSource(m.seed)),
 	}
-	t.current = initializeNode(gameState{m.init, 0}, t)
+	t.current = initializeNode(gameState{m.init, gameHash{m.init.Hash(), 0}}, t)
 
 	m.seed++
 	return t
@@ -74,34 +67,34 @@ func (m *MCTS) AddTree(t *Tree) {
 }
 
 //BestAction takes all of the searched trees and returns
-//the best action based on the highest win percentage
-//of each action.
+//the index of the best action based on the highest win
+//percentage of each action.
 //
-//BestAction returns nil if it has received no trees
-//to search through or if the current state
-//it's considering has no legal actions or is terminal.
-func (m *MCTS) BestAction() Action {
+//BestAction returns ErrNoTrees if it has received no trees
+//to search through, ErrNoActions if the current state
+//it's considering has no legal actions, or ErrTerminal
+//if the current state it's considering is terminal.
+func (m *MCTS) BestAction() (int, error) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
+	//Error checking
 	if len(m.trees) == 0 {
-		return nil
-	}
-
-	//Safe guard set in place in case we're dealing
-	//with a terminal state
-	if m.init.IsTerminal() {
-		return nil
+		return -1, ErrNoTrees
+	} else if m.init.IsTerminal() {
+		return -1, ErrTerminal
+	} else if m.init.Len() <= 0 {
+		return -1, ErrNoActions
 	}
 
 	//Democracy Section: each tree votes for an action
-	actionScore := make(map[Action]int)
+	actionScore := make([]int, m.init.Len())
 	for _, t := range m.trees {
 		actionScore[t.bestAction()]++
 	}
 
 	//Democracy Section: the action with the most votes wins
-	var bestAction Action
+	var bestAction int
 	var mostVotes int
 	for a, s := range actionScore {
 		if s > mostVotes {
@@ -109,5 +102,5 @@ func (m *MCTS) BestAction() Action {
 			mostVotes = s
 		}
 	}
-	return bestAction
+	return bestAction, nil
 }

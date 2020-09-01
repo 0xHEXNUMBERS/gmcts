@@ -20,12 +20,13 @@ func initializeNode(g gameState, tree *Tree) *node {
 	}
 }
 
+//UCT2 algorithm is described in this paper
+//https://www.csse.uwa.edu.au/cig08/Proceedings/papers/8057.pdf
 func (n *node) UCT2(i int, p Player) float64 {
 	exploit := n.children[i].nodeScore[p] / float64(n.children[i].nodeVisits)
 
-	explore := math.Sqrt(
-		math.Log(float64(n.nodeVisits)) / n.childVisits[i],
-	)
+	explore := math.Log(float64(n.nodeVisits)) / n.childVisits[i]
+	explore = math.Sqrt(explore)
 
 	return exploit + n.tree.explorationConst*explore
 }
@@ -86,29 +87,28 @@ func (n *node) runSimulation() ([]Player, float64) {
 }
 
 func (n *node) expand() {
-	n.actions = n.state.GetActions()
-	n.actionCount = len(n.actions)
+	n.actionCount = n.state.Len()
 	n.unvisitedChildren = make([]*node, n.actionCount)
 	n.children = n.unvisitedChildren
 	n.childVisits = make([]float64, n.actionCount)
-	for i, a := range n.actions {
-		newGame, err := n.state.ApplyAction(a)
+	for i := 0; i < n.actionCount; i++ {
+		newGame, err := n.state.ApplyAction(i)
 		if err != nil {
 			panic(fmt.Sprintf("gmcts: Game returned an error when exploring the tree: %s", err))
 		}
 
-		newState := gameState{newGame, n.state.turn + 1}
+		newState := gameState{newGame, gameHash{newGame.Hash(), n.state.turn + 1}}
 
 		//If we already have a copy in cache, use that and update
 		//this node and its parents
-		if cachedNode, made := n.tree.gameStates[newState]; made {
+		if cachedNode, made := n.tree.gameStates[newState.gameHash]; made {
 			n.unvisitedChildren[i] = cachedNode
 		} else {
 			newNode := initializeNode(newState, n.tree)
 			n.unvisitedChildren[i] = newNode
 
 			//Save node for reuse
-			n.tree.gameStates[newState] = newNode
+			n.tree.gameStates[newState.gameHash] = newNode
 		}
 	}
 }
@@ -118,11 +118,13 @@ func (n *node) simulate() []Player {
 	for !game.IsTerminal() {
 		var err error
 
-		actions := game.GetActions()
-		panicIfNoActions(game, actions)
+		actions := game.Len()
+		if actions <= 0 {
+			panic(fmt.Sprintf("gmcts: game returned no actions on a non-terminal state: %#v", game))
+		}
 
-		randomIndex := n.tree.randSource.Intn(len(actions))
-		game, err = game.ApplyAction(actions[randomIndex])
+		randomIndex := n.tree.randSource.Intn(actions)
+		game, err = game.ApplyAction(randomIndex)
 		if err != nil {
 			panic(fmt.Sprintf("gmcts: game returned an error while searching the tree: %s", err))
 		}
