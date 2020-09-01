@@ -55,7 +55,12 @@ func runGame() {
         mcts.AddTree(tree)
 
         //Get the best action based off of the trees collected from mcts.AddTree()
-        bestAction := mcts.BestAction()
+        bestAction, err := mcts.BestAction()
+        if err != nil {
+            //...
+            //handle error
+            //...
+        }
 
         //Update the game state using the tree's best action
         gameState, _ = gameState.ApplyAction(bestAction)
@@ -84,7 +89,12 @@ for i := 0; i < concurrentTrees; i++ {
 //Wait for the 4 trees to finish searching
 wait.Wait()
 
-bestAction := mcts.BestAction()
+bestAction, err := mcts.BestAction()
+if err != nil {
+    //...
+    //handle error
+    //...
+}
 
 gameState, _ = gameState.ApplyAction(bestAction)
 ```

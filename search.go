@@ -20,6 +20,8 @@ func initializeNode(g gameState, tree *Tree) *node {
 	}
 }
 
+//UCT2 algorithm is described in this paper
+//https://www.csse.uwa.edu.au/cig08/Proceedings/papers/8057.pdf
 func (n *node) UCT2(i int, p Player) float64 {
 	exploit := n.children[i].nodeScore[p] / float64(n.children[i].nodeVisits)
 

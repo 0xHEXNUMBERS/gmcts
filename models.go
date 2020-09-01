@@ -10,8 +10,8 @@ type Player int
 
 //Game is the interface that represents game states.
 //
-//Any implementation of Game should be comparable (i.e. be a key in a map)
-//and immutable (state cannot change as this package calls any function).
+//Any implementation of Game should be immutable
+//(state cannot change as this package calls any function).
 type Game interface {
 	//Len returns the number of actions to consider.
 	Len() int
@@ -45,9 +45,8 @@ type gameHash struct {
 
 	//This is to separate states that seemingly look the same,
 	//but actually occur on different turn orders. Without this,
-	//the directed tree that multiple parent nodes will just
-	//become a directed graph, which this MCTS implementation
-	//cannot handle properly.
+	//the directed acyclic graph will become a directed cyclic graph,
+	//which this MCTS implementation cannot handle properly.
 	turn int
 }
 

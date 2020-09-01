@@ -33,7 +33,7 @@ func (m *MCTS) SpawnTree() *Tree {
 }
 
 //SetSeed sets the seed of the next tree to be spawned.
-//This value is initially set to 1, and increments on each
+//This value is initially set to 0, and increments on each
 //spawned tree.
 func (m *MCTS) SetSeed(seed int64) {
 	m.mutex.Lock()
