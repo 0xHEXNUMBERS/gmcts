@@ -6,6 +6,11 @@ GMCTS - Monte-Carlo Tree Search (the g stands for whatever you want it to mean :
 GMCTS is an implementation of the Monte-Carlo Tree Search algorithm
 with support for any deterministic game.
 
+Version 2
+========
+
+Checkout the documentation for [v2.x.x](v2/README.md)
+
 How To Install
 ==============
 
