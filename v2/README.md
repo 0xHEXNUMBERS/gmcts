@@ -1,4 +1,4 @@
-[![Documentation](https://img.shields.io/badge/Documentation-GoDoc-green.svg)](https://godoc.org/github.com/0xhexnumbers/gmcts/v2)
+[![Documentation](https://img.shields.io/badge/Documentation-GoDoc-green.svg)](https://pkg.go.dev/github.com/0xhexnumbers/gmcts/v2)
 
 GMCTS - Monte-Carlo Tree Search (the g stands for whatever you want it to mean :^) )
 ====================================================================================
@@ -112,7 +112,7 @@ If either of these fail, the test fails. It's a rather neat way to make sure eve
 Documentation
 =============
 
-Documentation for this package can be found either at [godoc.org](https://godoc.org/github.com/0xhexnumbers/gmcts/v2) or [pkg.go.dev](https://pkg.go.dev/github.com/0xhexnumbers/gmcts/v2)
+Documentation for this package can be found at [pkg.go.dev](https://pkg.go.dev/github.com/0xhexnumbers/gmcts/v2)
 
 Bug Reports
 ===========
